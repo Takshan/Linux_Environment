@@ -1,0 +1,1 @@
+Bash scripts to personalized linux environment..
