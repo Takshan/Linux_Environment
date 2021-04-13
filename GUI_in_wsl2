@@ -1,0 +1,31 @@
+Download and install VcXsrv or Xming (X11 for Windows) from sourceforge(see edit below)
+sudo apt-get update
+sudo apt-get install python3.6-tk (you may have to install a different python*-tk depnding on the python version you're using)
+pip install matplotlib (for matplotlib. but many other things now work too)
+export DISPLAY=localhost:0.0 (add to ~/.bashrc to make permanent. see WSL2 below)
+Anyways, after all that, this code running in ubuntu on wsl worked as is:
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+t = np.arange(0.0, 2.0, 0.01)
+s = 1 + np.sin(2*np.pi*t)
+plt.plot(t, s)
+
+plt.title('About as simple as it gets, folks')
+plt.show()
+result: enter image description here
+
+Maybe this is better done through a Jupyter notebook or something, but it's nice to have basic command-line python matplotlib functionality in Ubuntu for Windows on Subsystem for Linux, and this makes many other gui apps work too.
+
+For example you can install xeyes, and it will say to install x11-apps and installing that will install GTK which a lot of GUI apps use. But the point is once you have your DISPLAY set correctly, and your x server on windows, then most things that would work on a native ubuntu will work for the WSL.
+
+Edit 2019-09-04 : Today I was having issues with 'unable to get screen resources' after upgrading some libraries. So I installed VcXsrv and used that instead of Xming. Just install from https://sourceforge.net/projects/vcxsrv/ and run xlaunch.exe, select multiple windows, next next next ok. Then everything worked.
+
+Edit for WSL 2 users 2020-06-23 WSL2 (currently insider fast ring) has GPU/docker support so worth upgrade. However it runs in vm. For WSL 2, follow same steps 1-4 then:
+
+the ip is not localhost. it's in resolv.conf so run this instead (and include in ~/.bashrc):
+ export DISPLAY=`grep -oP "(?<=nameserver ).+" /etc/resolv.conf`:0.0
+Now double-check firewall: Windows Security -> Firewall & network protection -> Allow an app through firewall -> make sure VcXsrv has both public and private checked. (When Launching xlaunch first time, you might get a prompt to allow through firewall. This works too. Also, if VcXsrv is not in list of apps, you can manually add it, eg from 'C:\program files\vcxsrv\vcxsrv.exe')
+Launch VcXsrv with "Disable access control" ticked
+Note: a few WSL2 users got error like couldn't connect to display "172.x.x.x:0". If that's you try to check the IP address stored in DISPLAY with this command: echo $DISPLAY. If the showed IP seems to be wrong (i.e. "8.8.8.8" or another not working IP address) you need to change the code in ~/.bashrc showed in the point 5 to something that will get your instance's ip address. One user said this worked: export DISPLAY=$(ifconfig | grep inet | awk '{print $2}' | head -n 1 | awk '{print $0":0"}'). However for some others it did not work. YMMV, but just find your IP and use if for DISPLAY. For most WSL2 users, the command in #5 works.
